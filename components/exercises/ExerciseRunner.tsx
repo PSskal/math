@@ -26,6 +26,8 @@ import { NumericKeypadInput } from "@/components/exercises/inputs/NumericKeypadI
 import { DragInput } from "@/components/exercises/inputs/DragInput";
 import { TakeAwayInput } from "@/components/exercises/inputs/TakeAwayInput";
 import { CountTapInput } from "@/components/exercises/inputs/CountTapInput";
+import { DivisionGroupsGame } from "@/components/exercises/inputs/DivisionGroupsGame";
+import { MultiplicationBuildGame } from "@/components/exercises/inputs/MultiplicationBuildGame";
 import { ChoiceButtonsInput } from "@/components/exercises/inputs/ChoiceButtonsInput";
 import { ObjectOrderInput } from "@/components/exercises/inputs/ObjectOrderInput";
 import { PartWholeInput } from "@/components/exercises/inputs/PartWholeInput";
@@ -615,6 +617,43 @@ function KindBody({
       );
     }
 
+    // 0a-bis) División agrupando (estilo Synthesis): puntos dispersos que el
+    //    niño junta en grupos de `groups`. La cantidad de grupos formados es
+    //    la respuesta. El ExerciseVisual no se monta — el juego ES el visual.
+    if (visual === "division-groups") {
+      const p = ex.payload as { total?: number; groups?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <DivisionGroupsGame
+            key={resetSignal}
+            total={p.total ?? 0}
+            groupSize={p.groups ?? 1}
+            disabled={disabled}
+            onSelect={onSelectNumeric}
+          />
+        </div>
+      );
+    }
+
+    // 0a-ter) Multiplicación construyendo: el niño arma el arreglo fila por
+    //    fila y ve el conteo saltado acumulado. El total construido es la
+    //    respuesta. El ExerciseVisual no se monta — el juego ES el visual.
+    if (visual === "mult-array-build") {
+      const p = ex.payload as { rows?: number; cols?: number; item?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <MultiplicationBuildGame
+            key={resetSignal}
+            targetRows={p.rows ?? 1}
+            cols={p.cols ?? 1}
+            item={typeof p.item === "string" ? p.item : "🔵"}
+            disabled={disabled}
+            onSelect={onSelectNumeric}
+          />
+        </div>
+      );
+    }
+
     // 0b) Resta concreta: en vez de elegir un número, el niño SACA objetos
     //    tocándolos y cuenta los que quedan (concreto antes que abstracto).
     if (visual === "subtract") {
@@ -774,7 +813,8 @@ function KindBody({
 
     // 1) Visuales con choices fijas (compare/parity) — siguen hardcoded
     //    porque tienen sub-labels específicos.
-    if (visual === "compare") {
+    // balance-scale y fraction-compare también usan los mismos botones < = >.
+    if (visual === "compare" || visual === "balance-scale" || visual === "fraction-compare") {
       return (
         <>
           <div className="w-full flex justify-center mb-6 md:mb-8">
@@ -886,7 +926,7 @@ function Footer({
                 {isTrace ? "Traza el número y toca Terminé." : idleMessage}
               </span>
             </div>
-            <button disabled className="w-full md:w-auto md:min-w-[200px] ml-auto py-3 px-6 rounded-full bg-ink-mute/20 text-ink-mute font-black uppercase tracking-wide text-sm">
+            <button disabled className="w-full md:w-auto md:min-w-50 ml-auto py-3 px-6 rounded-full bg-ink-mute/20 text-ink-mute font-black uppercase tracking-wide text-sm">
               {isTrace ? "Traza y toca Terminé" : "Elige una respuesta"}
             </button>
           </>
@@ -900,7 +940,7 @@ function Footer({
             </div>
             <button
               onClick={() => { playTap(); onComprobar(); }}
-              className="btn-chunky w-full md:w-auto md:min-w-[200px] ml-auto py-3 px-8 rounded-full bg-sky text-white font-black uppercase tracking-wide text-sm"
+              className="btn-chunky w-full md:w-auto md:min-w-50 ml-auto py-3 px-8 rounded-full bg-sky text-white font-black uppercase tracking-wide text-sm"
               style={{ boxShadow: "0 4px 0 #2C8FB8" }}
             >
               Comprobar ✓

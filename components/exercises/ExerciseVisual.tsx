@@ -114,7 +114,7 @@ export function ExerciseVisual({ ex }: { ex: ExerciseDTO }) {
     case "empty-box": {
       return (
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-36 w-48 items-center justify-center rounded-[2rem] border-4 border-dashed border-ink/15 bg-cream text-6xl shadow-[var(--shadow-chunky-sm)]">
+          <div className="flex h-36 w-48 items-center justify-center rounded-[2rem] border-4 border-dashed border-ink/15 bg-cream text-6xl shadow-(--shadow-chunky-sm)">
             📦
           </div>
           <div className="font-fredoka text-2xl font-bold text-ink-soft">
@@ -287,7 +287,8 @@ export function ExerciseVisual({ ex }: { ex: ExerciseDTO }) {
     }
 
     case "place-value": {
-      const { tens = 0, ones = 0, value } = ex.payload as {
+      const { hundreds = 0, tens = 0, ones = 0, value } = ex.payload as {
+        hundreds?: number;
         tens?: number;
         ones?: number;
         value?: number;
@@ -298,26 +299,119 @@ export function ExerciseVisual({ ex }: { ex: ExerciseDTO }) {
             <div className="font-fredoka text-4xl font-bold text-sky">{value}</div>
           )}
           <div className="flex flex-wrap justify-center gap-5">
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-[10px] font-black tracking-widest text-ink-mute">DECENAS</div>
-              <div className="flex flex-wrap justify-center gap-2 max-w-48">
-                {Array.from({ length: tens }).map((_, i) => (
-                  <div key={i} className="grid grid-cols-2 gap-0.5 rounded-xl bg-sky-soft p-1.5 shadow-[var(--shadow-chunky-sm)]">
-                    {Array.from({ length: 10 }).map((_, j) => (
-                      <span key={j} className="h-2.5 w-2.5 rounded-full bg-sky" />
-                    ))}
-                  </div>
-                ))}
+            {hundreds > 0 && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-[10px] font-black tracking-widest text-ink-mute">CENTENAS</div>
+                <div className="flex flex-wrap justify-center gap-2 max-w-56">
+                  {Array.from({ length: hundreds }).map((_, i) => (
+                    <div key={i} className="grid grid-cols-5 gap-px rounded-xl bg-lilac/20 p-1.5 shadow-(--shadow-chunky-sm)">
+                      {Array.from({ length: 25 }).map((_, j) => (
+                        <span key={j} className="h-2 w-2 rounded-sm bg-lilac" />
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col items-center gap-2">
-              <div className="text-[10px] font-black tracking-widest text-ink-mute">UNIDADES</div>
-              <div className="flex flex-wrap justify-center gap-1.5 max-w-36">
-                {Array.from({ length: ones }).map((_, i) => (
-                  <span key={i} className="h-5 w-5 rounded-full bg-sun shadow-[var(--shadow-chunky-sm)]" />
-                ))}
+            )}
+            {tens > 0 && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-[10px] font-black tracking-widest text-ink-mute">DECENAS</div>
+                <div className="flex flex-wrap justify-center gap-2 max-w-48">
+                  {Array.from({ length: tens }).map((_, i) => (
+                    <div key={i} className="grid grid-cols-2 gap-0.5 rounded-xl bg-sky-soft p-1.5 shadow-(--shadow-chunky-sm)">
+                      {Array.from({ length: 10 }).map((_, j) => (
+                        <span key={j} className="h-2.5 w-2.5 rounded-full bg-sky" />
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+            {ones > 0 && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="text-[10px] font-black tracking-widest text-ink-mute">UNIDADES</div>
+                <div className="flex flex-wrap justify-center gap-1.5 max-w-36">
+                  {Array.from({ length: ones }).map((_, i) => (
+                    <span key={i} className="h-5 w-5 rounded-full bg-sun shadow-(--shadow-chunky-sm)" />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // "mult-array-build" no se renderea aquí: el ExerciseRunner lo rutea al
+    // MultiplicationBuildGame, donde construir el arreglo ES el visual.
+
+    case "fraction-bar": {
+      const { numerator, denominator } = ex.payload as {
+        numerator: number;
+        denominator: number;
+      };
+      return (
+        <div className="flex flex-col items-center gap-4">
+          <div className="flex gap-1.5">
+            {Array.from({ length: denominator }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-14 rounded-xl border-2 border-white shadow-(--shadow-chunky-sm) transition-colors ${
+                  i < numerator ? "bg-sky" : "bg-cream"
+                }`}
+                style={{ width: `${Math.min(56, Math.floor(280 / denominator))}px` }}
+              />
+            ))}
+          </div>
+          <div className="flex flex-col items-center leading-none font-fredoka font-bold">
+            <span className="text-4xl text-sky">{numerator}</span>
+            <div className="my-1 h-0.5 w-10 rounded-full bg-ink" />
+            <span className="text-4xl text-ink">{denominator}</span>
+          </div>
+        </div>
+      );
+    }
+
+    case "clock-face": {
+      const { hours = 0, minutes = 0 } = ex.payload as {
+        hours?: number;
+        minutes?: number;
+      };
+      const hourDeg = (hours % 12) * 30 + minutes * 0.5;
+      const minuteDeg = minutes * 6;
+      return (
+        <div className="flex flex-col items-center gap-3">
+          <svg width="160" height="160" viewBox="0 0 160 160" aria-label={`${hours}:${String(minutes).padStart(2, "0")}`}>
+            {/* Cara */}
+            <circle cx="80" cy="80" r="74" fill="white" stroke="#e2e8f0" strokeWidth="8" />
+            {/* Marcas de hora */}
+            {Array.from({ length: 12 }).map((_, i) => {
+              const a = (i * 30 - 90) * (Math.PI / 180);
+              const x1 = 80 + 60 * Math.cos(a);
+              const y1 = 80 + 60 * Math.sin(a);
+              const x2 = 80 + 70 * Math.cos(a);
+              const y2 = 80 + 70 * Math.sin(a);
+              return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#94a3b8" strokeWidth={i % 3 === 0 ? 3 : 1.5} strokeLinecap="round" />;
+            })}
+            {/* Manecilla hora */}
+            <line
+              x1="80" y1="80"
+              x2={80 + 38 * Math.sin(hourDeg * Math.PI / 180)}
+              y2={80 - 38 * Math.cos(hourDeg * Math.PI / 180)}
+              stroke="#1e293b" strokeWidth="5" strokeLinecap="round"
+            />
+            {/* Manecilla minutos */}
+            <line
+              x1="80" y1="80"
+              x2={80 + 54 * Math.sin(minuteDeg * Math.PI / 180)}
+              y2={80 - 54 * Math.cos(minuteDeg * Math.PI / 180)}
+              stroke="#4867f5" strokeWidth="3" strokeLinecap="round"
+            />
+            {/* Centro */}
+            <circle cx="80" cy="80" r="4" fill="#1e293b" />
+          </svg>
+          <div className="font-fredoka text-2xl font-bold text-ink">
+            {hours}:{String(minutes).padStart(2, "0")}
           </div>
         </div>
       );
@@ -351,7 +445,7 @@ export function ExerciseVisual({ ex }: { ex: ExerciseDTO }) {
           {items.map((item, i) => (
             <div
               key={i}
-              className={`flex h-16 w-16 flex-col items-center justify-center rounded-2xl border-4 bg-white font-black shadow-[var(--shadow-chunky-sm)] ${
+              className={`flex h-16 w-16 flex-col items-center justify-center rounded-2xl border-4 bg-white font-black shadow-(--shadow-chunky-sm) ${
                 i === targetIndex ? "border-sky text-sky" : "border-cream text-ink-soft"
               }`}
             >
@@ -370,7 +464,7 @@ export function ExerciseVisual({ ex }: { ex: ExerciseDTO }) {
           {coins.map((coin, i) => (
             <div
               key={i}
-              className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-sun-soft font-fredoka text-lg font-bold text-ink shadow-[var(--shadow-chunky-sm)]"
+              className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-sun-soft font-fredoka text-lg font-bold text-ink shadow-(--shadow-chunky-sm)"
             >
               S/{coin}
             </div>
@@ -447,6 +541,166 @@ export function ExerciseVisual({ ex }: { ex: ExerciseDTO }) {
         </div>
       );
     }
+
+    // ── NUMBER BOND ─────────────────────────────────────────────────────────
+    // Singapore-style part-whole diagram. partA / partB / whole: null = the "?".
+    case "number-bond": {
+      const { whole, partA, partB } = ex.payload as {
+        whole: number | null;
+        partA: number | null;
+        partB: number | null;
+      };
+      return (
+        <div className="flex flex-col items-center gap-1 py-2">
+          <div className="flex items-end gap-10">
+            <BondCircle value={partA} variant="part" />
+            <BondCircle value={partB} variant="part" />
+          </div>
+          <svg width="180" height="44" viewBox="0 0 180 44" className="overflow-visible" aria-hidden>
+            {/* Lines from part circles to whole circle */}
+            <line x1="42" y1="2" x2="90" y2="42" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="138" y1="2" x2="90" y2="42" stroke="#94a3b8" strokeWidth="2.5" strokeLinecap="round"/>
+          </svg>
+          <BondCircle value={whole} variant="whole" />
+        </div>
+      );
+    }
+
+    // ── BALANCE SCALE ────────────────────────────────────────────────────────
+    // SVG balance scale. Tilts to show which side is heavier — the child must
+    // then pick <, =, or > to name the relationship.
+    case "balance-scale": {
+      const { left, right } = ex.payload as { left: number | string; right: number | string };
+      const lv = parseFloat(String(left));
+      const rv = parseFloat(String(right));
+      // Fixed tilt: 10° toward the heavier side. 0° if equal or unparseable.
+      const tilt = (!isNaN(lv) && !isNaN(rv)) ? (lv > rv ? 10 : lv < rv ? -10 : 0) : 0;
+      const rad  = (tilt * Math.PI) / 180;
+      const CX = 110; const CY = 62;
+      const ARM = 76; // half-beam length
+      const lx = CX - ARM * Math.cos(rad);
+      const ly = CY - ARM * Math.sin(rad);
+      const rx = CX + ARM * Math.cos(rad);
+      const ry = CY + ARM * Math.sin(rad);
+      const ROPE = 32;
+      return (
+        <div className="flex flex-col items-center gap-2">
+          <svg width="220" height="160" viewBox="0 0 220 160" aria-label={`${left} comparado con ${right}`}>
+            {/* Stand */}
+            <rect x="106" y={CY} width="8" height="72" fill="#94a3b8" rx="3"/>
+            <ellipse cx="110" cy="134" rx="30" ry="7" fill="#64748b"/>
+            {/* Beam */}
+            <line x1={lx} y1={ly} x2={rx} y2={ry} stroke="#334155" strokeWidth="6" strokeLinecap="round"/>
+            {/* Left ropes + pan */}
+            <line x1={lx-12} y1={ly+2} x2={lx-16} y2={ly+ROPE} stroke="#94a3b8" strokeWidth="1.5"/>
+            <line x1={lx+12} y1={ly+2} x2={lx+16} y2={ly+ROPE} stroke="#94a3b8" strokeWidth="1.5"/>
+            <ellipse cx={lx} cy={ly+ROPE+5} rx="22" ry="6" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="2"/>
+            {/* Right ropes + pan */}
+            <line x1={rx-12} y1={ry+2} x2={rx-16} y2={ry+ROPE} stroke="#94a3b8" strokeWidth="1.5"/>
+            <line x1={rx+12} y1={ry+2} x2={rx+16} y2={ry+ROPE} stroke="#94a3b8" strokeWidth="1.5"/>
+            <ellipse cx={rx} cy={ry+ROPE+5} rx="22" ry="6" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="2"/>
+            {/* Pivot */}
+            <circle cx={CX} cy={CY} r="5" fill="#1e293b"/>
+          </svg>
+          {/* Values below pans */}
+          <div className="flex items-center gap-24 -mt-1">
+            <span className="font-fredoka text-3xl font-bold text-sky">{left}</span>
+            <span className="font-fredoka text-3xl font-bold text-pink">{right}</span>
+          </div>
+        </div>
+      );
+    }
+
+    // ── BAR MODEL ────────────────────────────────────────────────────────────
+    // Singapore-style tape diagram. total null = unknown whole.
+    // parts: array of { value: number|null, label?: string }.
+    case "bar-model": {
+      const { total, parts = [] } = ex.payload as {
+        total: number | null;
+        parts: { value: number | null; label?: string }[];
+      };
+      const BAR_COLORS = [
+        "bg-sky text-white",
+        "bg-mint text-white",
+        "bg-sun text-ink",
+        "bg-lilac text-white",
+        "bg-peach text-ink",
+      ];
+      const knownSum = parts.reduce((s, p) => s + (p.value ?? 0), 0);
+      const scaleBase = total ?? Math.max(knownSum, 1);
+      return (
+        <div className="flex flex-col items-center gap-2 w-full max-w-sm px-2">
+          {/* ── Whole bar (total) ─ shown above if known */}
+          {total !== null && (
+            <div className="flex items-center gap-2 w-full">
+              <span className="font-fredoka text-2xl font-bold text-ink w-12 text-right shrink-0">{total}</span>
+              <div className="flex-1 h-12 rounded-xl bg-mint/20 border-2 border-mint flex items-center justify-center">
+                <span className="font-fredoka font-bold text-mint text-lg">todo</span>
+              </div>
+            </div>
+          )}
+          {/* ── Parts bar ─────────────────────────────────────────────────── */}
+          <div className="flex items-center gap-2 w-full">
+            {total === null && (
+              <span className="font-fredoka text-2xl font-bold text-ink-mute w-12 text-right shrink-0">?</span>
+            )}
+            {total !== null && <span className="w-12 shrink-0" />}
+            <div className="flex flex-1 gap-1 h-12">
+              {parts.map((p, i) => {
+                const flex = p.value !== null
+                  ? Math.max(0.15, p.value / scaleBase)
+                  : Math.max(0.15, (scaleBase - knownSum) / scaleBase);
+                const isUnknown = p.value === null;
+                const cls = isUnknown
+                  ? "border-2 border-dashed border-ink/25 bg-cream/80"
+                  : BAR_COLORS[i % BAR_COLORS.length];
+                return (
+                  <div
+                    key={i}
+                    className={`rounded-xl flex items-center justify-center font-fredoka font-bold text-lg transition-all ${cls}`}
+                    style={{ flex }}
+                  >
+                    {isUnknown
+                      ? <span className="text-ink-mute text-2xl">?</span>
+                      : <span>{p.label ?? p.value}</span>
+                    }
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          {/* ── Bracket showing total=? when unknown ──────────────────────── */}
+          {total === null && (
+            <div className="flex items-center gap-2 w-full">
+              <span className="w-12 shrink-0" />
+              <div className="flex-1 flex flex-col items-center gap-0.5 pt-0.5">
+                <div className="w-full border-t-2 border-ink/20" />
+                <span className="text-xs font-black text-ink-mute tracking-widest">TOTAL = ?</span>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── FRACTION COMPARE ─────────────────────────────────────────────────────
+    // Two fraction bars of equal width so their filled areas are truly comparable.
+    case "fraction-compare": {
+      const { n1, d1, n2, d2 } = ex.payload as {
+        n1: number; d1: number; n2: number; d2: number;
+      };
+      return (
+        <div className="flex items-center gap-6 md:gap-10">
+          <FractionBar n={n1} d={d1} color="sky" />
+          <span className="font-fredoka text-4xl font-bold text-ink-mute">?</span>
+          <FractionBar n={n2} d={d2} color="lilac" />
+        </div>
+      );
+    }
+
+    // ── DIVISION GROUPS ──────────────────────────────────────────────────────
+    // No se renderea aquí: el ExerciseRunner rutea "division-groups" al
+    // DivisionDealInput, donde el reparto interactivo ES el visual.
 
     // -----------------------------------------------------------------
     // READING visuals
@@ -552,6 +806,52 @@ function NumberCard({ n, placeholder = false }: { n?: number; placeholder?: bool
       style={{ boxShadow: placeholder ? "none" : "var(--shadow-chunky-sm)" }}
     >
       {placeholder ? "?" : n}
+    </div>
+  );
+}
+
+function BondCircle({ value, variant }: { value: number | null; variant: "part" | "whole" }) {
+  const isUnknown = value === null;
+  const sizeClass = variant === "whole"
+    ? "w-20 h-20 md:w-24 md:h-24 text-3xl md:text-4xl"
+    : "w-16 h-16 md:w-20 md:h-20 text-2xl md:text-3xl";
+  const colorClass = isUnknown
+    ? "border-dashed border-ink/25 bg-cream text-ink-mute"
+    : variant === "whole"
+    ? "border-white bg-mint-soft text-mint shadow-(--shadow-chunky-sm)"
+    : "border-white bg-sky-soft text-sky shadow-(--shadow-chunky-sm)";
+  return (
+    <div className={`${sizeClass} rounded-full border-4 flex items-center justify-center font-fredoka font-bold ${colorClass}`}>
+      {isUnknown ? "?" : value}
+    </div>
+  );
+}
+
+function FractionBar({ n, d, color }: { n: number; d: number; color: "sky" | "lilac" | "mint" | "peach" }) {
+  const colorMap: Record<string, [string, string]> = {
+    sky:   ["bg-sky",   "bg-sky-soft"],
+    lilac: ["bg-lilac", "bg-lilac/20"],
+    mint:  ["bg-mint",  "bg-mint-soft"],
+    peach: ["bg-peach", "bg-peach-soft"],
+  };
+  const [filled, empty] = colorMap[color] ?? colorMap.sky;
+  const partW = Math.min(52, Math.floor(200 / d));
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex gap-1">
+        {Array.from({ length: d }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-12 md:h-14 rounded-lg border-2 border-white ${i < n ? filled : empty}`}
+            style={{ width: partW }}
+          />
+        ))}
+      </div>
+      <div className="flex flex-col items-center leading-none font-fredoka font-bold">
+        <span className="text-3xl md:text-4xl text-ink">{n}</span>
+        <div className="my-1 h-0.5 w-9 rounded-full bg-ink" />
+        <span className="text-3xl md:text-4xl text-ink">{d}</span>
+      </div>
     </div>
   );
 }

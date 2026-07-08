@@ -60,7 +60,10 @@ export default async function LessonPage({
   }
 
   const rawExercises = await getLessonExercises(id);
-  if (!rawExercises.length) notFound();
+  // Lección sin ejercicios aún → vuelve al mapa del path en vez de mostrar 404.
+  if (!rawExercises.length) {
+    redirect(`/paths/${lesson.unit.learningPath.slug}`);
+  }
 
   // No re-enseñar lo aprendido: si la lección ya fue completada, al repetirla
   // se saltea el Momento Lumi y se va directo a practicar.
@@ -69,7 +72,7 @@ export default async function LessonPage({
     select: { completed: true },
   });
   const exercises = progress?.completed ? stripTeach(rawExercises) : rawExercises;
-  if (!exercises.length) notFound();
+  if (!exercises.length) redirect(`/paths/${lesson.unit.learningPath.slug}`);
 
   return (
     <LessonRunner
