@@ -78,22 +78,8 @@ export function ExerciseVisual({ ex }: { ex: ExerciseDTO }) {
       );
     }
 
-    case "parity": {
-      const { value } = ex.payload as { value: number };
-      const dots = Math.min(value, 10);
-      return (
-        <div className="flex flex-col items-center gap-3">
-          <div className="font-fredoka text-[120px] md:text-[180px] font-bold text-sky leading-none">
-            {value}
-          </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-1">
-            {Array.from({ length: dots }).map((_, i) => (
-              <span key={i} className="text-2xl" aria-hidden>•</span>
-            ))}
-          </div>
-        </div>
-      );
-    }
+    // "parity" no se renderea aquí: el ExerciseRunner lo rutea al
+    // ParityHammerGame, donde partir el grupo con el martillo ES el visual.
 
     case "number-card": {
       const { digit } = ex.payload as { digit: number };

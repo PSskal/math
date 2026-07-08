@@ -28,6 +28,7 @@ import { TakeAwayInput } from "@/components/exercises/inputs/TakeAwayInput";
 import { CountTapInput } from "@/components/exercises/inputs/CountTapInput";
 import { DivisionGroupsGame } from "@/components/exercises/inputs/DivisionGroupsGame";
 import { MultiplicationBuildGame } from "@/components/exercises/inputs/MultiplicationBuildGame";
+import { ParityHammerGame } from "@/components/exercises/inputs/ParityHammerGame";
 import { ChoiceButtonsInput } from "@/components/exercises/inputs/ChoiceButtonsInput";
 import { ObjectOrderInput } from "@/components/exercises/inputs/ObjectOrderInput";
 import { PartWholeInput } from "@/components/exercises/inputs/PartWholeInput";
@@ -272,7 +273,7 @@ export function ExerciseRunner({
   }
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-white">
+    <div className="min-h-dvh flex flex-col bg-white">
       <header className="sticky top-0 z-20 bg-white border-b border-ink/5">
         <div className="max-w-4xl mx-auto flex items-center gap-4 px-4 md:px-6 h-14">
           <button
@@ -833,22 +834,19 @@ function KindBody({
         </>
       );
     }
+    // Par/impar con martillo: el niño parte el grupo en dos bandejas y ve si
+    // sobra uno. El juego incluye sus propios botones Par/Impar (con los
+    // values capitalizados que espera solution.answer).
     if (visual === "parity") {
+      const p = ex.payload as { value?: number };
       return (
-        <>
-          <div className="w-full flex justify-center mb-6 md:mb-8">
-            <ExerciseVisual ex={ex}/>
-          </div>
-          <ChoiceButtonsInput
-            choices={[
-              { value: "par", label: "Par", sub: "se reparte de a 2" },
-              { value: "impar", label: "Impar", sub: "queda uno solo" },
-            ]}
-            disabled={disabled}
-            selected={stringPicked as never}
-            onPick={onSelectString}
-          />
-        </>
+        <ParityHammerGame
+          key={resetSignal}
+          value={p.value ?? 0}
+          disabled={disabled}
+          selected={stringPicked}
+          onPick={onSelectString}
+        />
       );
     }
 
