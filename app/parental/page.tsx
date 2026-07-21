@@ -11,6 +11,11 @@ import {
   activeDays,
   avgExerciseTimeMs,
 } from "@/lib/analytics/parent-insights";
+import {
+  getWeeklyReport,
+  formatWeeklyReportMessage,
+} from "@/lib/analytics/weekly-report";
+import { WeeklyReportCard } from "./WeeklyReportCard";
 
 function startOfDay(d: Date) {
   const x = new Date(d); x.setHours(0, 0, 0, 0); return x;
@@ -73,6 +78,11 @@ export default async function ParentalPage() {
   const lessonsCompleted = await prisma.progress.count({ where: { childId: child.id, completed: true } });
   const maxMin = Math.max(...days.map((d) => d.minutes), 1);
 
+  const weeklyReport = await getWeeklyReport(child.id, now);
+  const weeklyMessage = weeklyReport
+    ? formatWeeklyReportMessage(weeklyReport)
+    : null;
+
   return (
     <div className="min-h-[100dvh] bg-[#F5F0FB] md:bg-cream flex flex-col">
       {/* TOP BAR */}
@@ -102,6 +112,19 @@ export default async function ParentalPage() {
               </div>
             ))}
           </div>
+
+          {/* Reporte semanal compartible */}
+          {weeklyReport && weeklyMessage && (
+            <WeeklyReportCard
+              childName={weeklyReport.childName}
+              message={weeklyMessage}
+              stats={[
+                { icon: "📚", value: weeklyReport.lessonsThisWeek, label: "Lecciones" },
+                { icon: "⭐", value: weeklyReport.xpThisWeek, label: "XP ganado" },
+                { icon: "📅", value: `${weeklyReport.activeDaysThisWeek}/7`, label: "Días activos" },
+              ]}
+            />
+          )}
 
           <div className="md:grid md:grid-cols-2 md:gap-6 space-y-4 md:space-y-0">
             {/* Chart semana */}

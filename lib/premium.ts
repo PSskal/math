@@ -1,8 +1,15 @@
 import type { SubscriptionPlan } from "@prisma/client";
 
+/** Duración de la prueba gratuita, en días. */
+export const TRIAL_DAYS = 7;
+
 export type PremiumUser = {
   plan: SubscriptionPlan;
   premiumUntil: Date | null;
+};
+
+export type TrialUser = PremiumUser & {
+  trialStartedAt: Date | null;
 };
 
 export type PremiumStatus = "free" | "active" | "expiring_soon" | "expired";
@@ -24,6 +31,35 @@ export function premiumStatus(user: PremiumUser, now = new Date()): PremiumStatu
   }
 
   return "active";
+}
+
+/**
+ * ¿El usuario puede iniciar la prueba gratuita? Sólo si nunca la ha usado
+ * y todavía está en plan FREE (no tiene sentido para quien ya es Premium).
+ */
+export function canStartTrial(user: TrialUser) {
+  return user.trialStartedAt == null && user.plan === "FREE";
+}
+
+/**
+ * Días completos que le quedan a la prueba. Devuelve 0 si ya expiró o si el
+ * usuario nunca inició la prueba. Redondea hacia arriba: durante el último
+ * día parcial sigue mostrando "1 día".
+ */
+export function trialDaysLeft(user: TrialUser, now = new Date()) {
+  if (!user.trialStartedAt || !user.premiumUntil) return 0;
+  const ms = user.premiumUntil.getTime() - now.getTime();
+  if (ms <= 0) return 0;
+  return Math.ceil(ms / (24 * 60 * 60 * 1000));
+}
+
+/** ¿El acceso premium actual proviene de la prueba gratuita en curso? */
+export function isTrialActive(user: TrialUser, now = new Date()) {
+  return (
+    user.trialStartedAt != null &&
+    user.premiumUntil != null &&
+    user.premiumUntil > now
+  );
 }
 
 export function addMonthsUtc(date: Date, months: number) {

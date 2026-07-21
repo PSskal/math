@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   addDaysUtc,
   addMonthsUtc,
+  canStartTrial,
   hasPremiumAccess,
+  isTrialActive,
   premiumStatus,
+  trialDaysLeft,
 } from "@/lib/premium";
 
 const now = new Date("2026-06-02T12:00:00.000Z");
@@ -81,5 +84,54 @@ describe("premium access", () => {
 
   it("adds days using UTC date arithmetic", () => {
     expect(addDaysUtc(now, 1).toISOString()).toBe("2026-06-03T12:00:00.000Z");
+  });
+});
+
+describe("free trial", () => {
+  it("lets a fresh free user start the trial", () => {
+    expect(
+      canStartTrial({ plan: "FREE", premiumUntil: null, trialStartedAt: null }),
+    ).toBe(true);
+  });
+
+  it("blocks starting the trial once it was used", () => {
+    expect(
+      canStartTrial({
+        plan: "FREE",
+        premiumUntil: null,
+        trialStartedAt: new Date("2026-05-01T12:00:00.000Z"),
+      }),
+    ).toBe(false);
+  });
+
+  it("blocks the trial for users who are already premium", () => {
+    expect(
+      canStartTrial({
+        plan: "PREMIUM",
+        premiumUntil: addDaysUtc(now, 30),
+        trialStartedAt: null,
+      }),
+    ).toBe(false);
+  });
+
+  it("counts remaining trial days rounding up", () => {
+    const user = {
+      plan: "PREMIUM" as const,
+      premiumUntil: new Date("2026-06-05T00:00:00.000Z"),
+      trialStartedAt: new Date("2026-05-29T00:00:00.000Z"),
+    };
+    // now = 2026-06-02T12:00 → 2.5 days left → ceil → 3
+    expect(trialDaysLeft(user, now)).toBe(3);
+    expect(isTrialActive(user, now)).toBe(true);
+  });
+
+  it("reports zero days and inactive once the trial expired", () => {
+    const user = {
+      plan: "PREMIUM" as const,
+      premiumUntil: new Date("2026-06-01T12:00:00.000Z"),
+      trialStartedAt: new Date("2026-05-25T12:00:00.000Z"),
+    };
+    expect(trialDaysLeft(user, now)).toBe(0);
+    expect(isTrialActive(user, now)).toBe(false);
   });
 });

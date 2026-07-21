@@ -8,13 +8,18 @@ import {
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/server";
 import {
+  canStartTrial,
   formatPremiumDate,
   hasPremiumAccess,
+  isTrialActive,
   premiumStatus,
+  trialDaysLeft,
+  TRIAL_DAYS,
 } from "@/lib/premium";
 import { TopNav } from "@/components/TopNav";
 import { brand } from "@/lib/brand";
 import { WhatsAppIcon } from "@/components/WhatsAppIcon";
+import { StartTrialButton } from "./StartTrialButton";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +41,9 @@ export default async function PremiumPage() {
   const status = user ? premiumStatus(user) : "free";
   const premiumUntilLabel = formatPremiumDate(user?.premiumUntil);
   const whatsappHref = premiumWhatsappHref(user?.email);
+  const trialEligible = user ? canStartTrial(user) : false;
+  const onTrial = user ? isTrialActive(user) : false;
+  const daysLeft = user ? trialDaysLeft(user) : 0;
 
   const ctaText = isPremium
     ? "Ver mis cursos"
@@ -135,21 +143,39 @@ export default async function PremiumPage() {
                 <Crown className="h-9 w-9" aria-hidden />
               </div>
               <h2 className="mt-4 font-fredoka text-2xl font-bold text-slate-950">
-                {isPremium
-                  ? "Premium activo"
-                  : status === "expired"
-                    ? "Tu Premium venció"
-                    : "Activa Premium"}
+                {onTrial
+                  ? "Prueba gratis activa"
+                  : isPremium
+                    ? "Premium activo"
+                    : status === "expired"
+                      ? "Tu Premium venció"
+                      : trialEligible
+                        ? `${TRIAL_DAYS} días gratis`
+                        : "Activa Premium"}
               </h2>
               <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-                {isPremium
-                  ? premiumUntilLabel
-                    ? `Tu cuenta está en plan ${user?.plan} hasta ${premiumUntilLabel}.`
-                    : `Tu cuenta está en plan ${user?.plan}.`
-                  : status === "expired"
-                    ? "Escríbenos por WhatsApp con tu correo para renovar tu acceso."
-                    : "Escríbenos por WhatsApp con el correo que usaste al registrarte. Luego activamos tu plan manualmente."}
+                {onTrial
+                  ? `Te ${daysLeft === 1 ? "queda" : "quedan"} ${daysLeft} ${daysLeft === 1 ? "día" : "días"} de prueba. Después escríbenos por WhatsApp para seguir con Premium.`
+                  : isPremium
+                    ? premiumUntilLabel
+                      ? `Tu cuenta está en plan ${user?.plan} hasta ${premiumUntilLabel}.`
+                      : `Tu cuenta está en plan ${user?.plan}.`
+                    : status === "expired"
+                      ? "Escríbenos por WhatsApp con tu correo para renovar tu acceso."
+                      : trialEligible
+                        ? "Desbloquea todos los cursos gratis por una semana. Sin tarjeta y sin compromiso."
+                        : "Escríbenos por WhatsApp con el correo que usaste al registrarte. Luego activamos tu plan manualmente."}
               </p>
+
+              {trialEligible && (
+                <div className="mt-5">
+                  <StartTrialButton trialDays={TRIAL_DAYS} />
+                  <p className="mt-2 text-center text-xs font-semibold text-slate-400">
+                    No pedimos tarjeta. Al terminar vuelves al plan gratis
+                    automáticamente.
+                  </p>
+                </div>
+              )}
 
               {!isPremium && (
                 <div className="mt-5 space-y-3 rounded-2xl bg-[#f7f9ff] p-4 text-left">

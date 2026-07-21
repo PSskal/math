@@ -29,6 +29,52 @@ import { CountTapInput } from "@/components/exercises/inputs/CountTapInput";
 import { DivisionGroupsGame } from "@/components/exercises/inputs/DivisionGroupsGame";
 import { MultiplicationBuildGame } from "@/components/exercises/inputs/MultiplicationBuildGame";
 import { ParityHammerGame } from "@/components/exercises/inputs/ParityHammerGame";
+import { PlaceValueMarketGame } from "@/components/exercises/inputs/PlaceValueMarketGame";
+import { PlaceValueDigitGame } from "@/components/exercises/inputs/PlaceValueDigitGame";
+import { ColumnAdditionGame } from "@/components/exercises/inputs/ColumnAdditionGame";
+import { ColumnSubtractionGame } from "@/components/exercises/inputs/ColumnSubtractionGame";
+import { MentalCalcGame } from "@/components/exercises/inputs/MentalCalcGame";
+import { ArrayPackerGame } from "@/components/exercises/inputs/ArrayPackerGame";
+import { FlashCardMultGame } from "@/components/exercises/inputs/FlashCardMultGame";
+import { PieSliceGame } from "@/components/exercises/inputs/PieSliceGame";
+import { FractionBarsGame } from "@/components/exercises/inputs/FractionBarsGame";
+import { FruitFractionGame } from "@/components/exercises/inputs/FruitFractionGame";
+import { FractionTileGame } from "@/components/exercises/inputs/FractionTileGame";
+import { MoneyCountGame } from "@/components/exercises/inputs/MoneyCountGame";
+import { ChangeMakingGame } from "@/components/exercises/inputs/ChangeMakingGame";
+import { MoneyCompareGame } from "@/components/exercises/inputs/MoneyCompareGame";
+import { UnitTapGame } from "@/components/exercises/inputs/UnitTapGame";
+import { MeasureCompareGame } from "@/components/exercises/inputs/MeasureCompareGame";
+import { UnitBlockGame } from "@/components/exercises/inputs/UnitBlockGame";
+import { ClockSetGame } from "@/components/exercises/inputs/ClockSetGame";
+import { ClockReadGame } from "@/components/exercises/inputs/ClockReadGame";
+import { OrdinalTapGame } from "@/components/exercises/inputs/OrdinalTapGame";
+import { ShapeCountGame } from "@/components/exercises/inputs/ShapeCountGame";
+import { PatternContinueGame } from "@/components/exercises/inputs/PatternContinueGame";
+import { PictogramReadGame } from "@/components/exercises/inputs/PictogramReadGame";
+import { TapShapesGame } from "@/components/exercises/inputs/TapShapesGame";
+import type { ShapeItem } from "@/components/exercises/inputs/TapShapesGame";
+import { ShapeComposeGame } from "@/components/exercises/inputs/ShapeComposeGame";
+import { ShapeDecomposeGame } from "@/components/exercises/inputs/ShapeDecomposeGame";
+import { GridTraceGame } from "@/components/exercises/inputs/GridTraceGame";
+import { BarGraphGame } from "@/components/exercises/inputs/BarGraphGame";
+import { AreaGridGame } from "@/components/exercises/inputs/AreaGridGame";
+import { AngleTapGame } from "@/components/exercises/inputs/AngleTapGame";
+import { RoundingGame } from "@/components/exercises/inputs/RoundingGame";
+import { FactorTapGame } from "@/components/exercises/inputs/FactorTapGame";
+import { DecimalBarGame } from "@/components/exercises/inputs/DecimalBarGame";
+import { SymmetryGridGame } from "@/components/exercises/inputs/SymmetryGridGame";
+import { NetMatchGame } from "@/components/exercises/inputs/NetMatchGame";
+import type { NetType } from "@/components/exercises/inputs/NetMatchGame";
+import { LineGraphGame } from "@/components/exercises/inputs/LineGraphGame";
+import { PieChartGame } from "@/components/exercises/inputs/PieChartGame";
+import { PercentGridGame } from "@/components/exercises/inputs/PercentGridGame";
+import { VolumeBuildGame } from "@/components/exercises/inputs/VolumeBuildGame";
+import { RatioBuildGame } from "@/components/exercises/inputs/RatioBuildGame";
+import { AlgebraScaleGame } from "@/components/exercises/inputs/AlgebraScaleGame";
+import { CirclePartsGame } from "@/components/exercises/inputs/CirclePartsGame";
+import type { CirclePart } from "@/components/exercises/inputs/CirclePartsGame";
+import { AverageLevelGame } from "@/components/exercises/inputs/AverageLevelGame";
 import { ChoiceButtonsInput } from "@/components/exercises/inputs/ChoiceButtonsInput";
 import { ObjectOrderInput } from "@/components/exercises/inputs/ObjectOrderInput";
 import { PartWholeInput } from "@/components/exercises/inputs/PartWholeInput";
@@ -162,6 +208,22 @@ export function ExerciseRunner({
   function comprobar() {
     if (selection === null || verdict !== null) return;
     const correct = evaluateAttempt(ex.kind, ex.solution, selection.value);
+    setVerdict({ correct });
+  }
+
+  // Juegos visuales que auto-validan internamente llaman esto en vez de
+  // onSelectNumeric: salta el paso de Comprobar y va directo al veredicto.
+  function selectAndVerify(value: number) {
+    if (verdict !== null) return;
+    const correct = evaluateAttempt(ex.kind, ex.solution, value);
+    setSelection({ value });
+    setVerdict({ correct });
+  }
+
+  function selectAndVerifyString(value: string) {
+    if (verdict !== null) return;
+    const correct = evaluateAttempt(ex.kind, ex.solution, value);
+    setSelection({ value });
     setVerdict({ correct });
   }
 
@@ -332,7 +394,9 @@ export function ExerciseRunner({
                   : hintLevel === "solution"
               }
               onSelectNumeric={(n) => select(n)}
+              onSelectAuto={(n) => selectAndVerify(n)}
               onSelectString={(s) => select(s)}
+              onSelectStringAuto={(s) => selectAndVerifyString(s)}
               onSelectStructured={(value) => select(value)}
               onTraceResult={onTraceResult}
               onMatchComplete={(pairs) => select(pairs)}
@@ -370,7 +434,7 @@ export function ExerciseRunner({
 
 function KindBody({
   ex, state, selectedValue, options, disabled, resetSignal, showSolution,
-  onSelectNumeric, onSelectString, onSelectStructured, onTraceResult, onMatchComplete, onOrderComplete,
+  onSelectNumeric, onSelectAuto, onSelectString, onSelectStringAuto, onSelectStructured, onTraceResult, onMatchComplete, onOrderComplete,
 }: {
   ex: ExerciseDTO;
   state: RunnerState;
@@ -380,7 +444,9 @@ function KindBody({
   resetSignal: number;
   showSolution: boolean;
   onSelectNumeric: (n: number) => void;
+  onSelectAuto: (n: number) => void;
   onSelectString: (s: string) => void;
+  onSelectStringAuto: (s: string) => void;
   onSelectStructured: (value: unknown) => void;
   onTraceResult: (r: { correct: boolean; stars: 0 | 1 | 2 | 3 }) => void;
   onMatchComplete: (pairs: number[][]) => void;
@@ -612,7 +678,7 @@ function KindBody({
             item={p.item ?? "⭐"}
             disabled={disabled}
             verified={state === "correct"}
-            onSubmit={onSelectNumeric}
+            onSubmit={onSelectAuto}
           />
         </div>
       );
@@ -630,7 +696,747 @@ function KindBody({
             total={p.total ?? 0}
             groupSize={p.groups ?? 1}
             disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // 0a-bis-1a) Resta en columnas: igual que suma pero con "pedir prestado".
+    if (visual === "column-subtraction") {
+      const p = ex.payload as { a?: number; b?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ColumnSubtractionGame
+            key={resetSignal}
+            a={p.a ?? 0}
+            b={p.b ?? 0}
+            disabled={disabled}
             onSelect={onSelectNumeric}
+          />
+        </div>
+      );
+    }
+
+    // 0a-bis-1) Suma en columnas: el niño completa el resultado dígito a dígito
+    //    (U→T→H). El componente valida cada dígito y llama onSelect(a+b)
+    //    solo cuando los tres están correctos.
+    if (visual === "column-addition") {
+      const p = ex.payload as { a?: number; b?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ColumnAdditionGame
+            key={resetSignal}
+            a={p.a ?? 0}
+            b={p.b ?? 0}
+            disabled={disabled}
+            onSelect={onSelectNumeric}
+          />
+        </div>
+      );
+    }
+
+    // 0a-bis-2) Valor posicional — dígito: muestra el número con colores por
+    //    posición, resalta un dígito y el niño elige cuánto VALE ese dígito.
+    if (visual === "place-value-digit") {
+      const p = ex.payload as { number?: number; askIndex?: number; choices?: number[] };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <PlaceValueDigitGame
+            key={resetSignal}
+            number={p.number ?? 0}
+            askIndex={p.askIndex ?? 0}
+            choices={Array.isArray(p.choices) ? p.choices : []}
+            disabled={disabled}
+            selected={numericPicked}
+            onPick={onSelectNumeric}
+          />
+        </div>
+      );
+    }
+
+    // 0a-ter) Mercado de Frutas — valor posicional: el niño toca columnas de
+    //    Centenas/Decenas/Unidades para construir el número target. El total
+    //    armado es la respuesta. Las columnas se muestran según el target.
+    if (visual === "place-value-market") {
+      const p = ex.payload as { target?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <PlaceValueMarketGame
+            key={resetSignal}
+            target={p.target ?? 0}
+            disabled={disabled}
+            onSelect={onSelectNumeric}
+          />
+        </div>
+      );
+    }
+
+    // Cálculo mental: muestra un número de inicio + operación (+/-) y el niño
+    // teclea el resultado. El hopper del tren salta al número correcto.
+    if (visual === "mental-calc") {
+      const p = ex.payload as { start?: number; op?: string; amount?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <MentalCalcGame
+            key={resetSignal}
+            start={p.start ?? 0}
+            op={(p.op as "+" | "-") ?? "+"}
+            amount={p.amount ?? 0}
+            disabled={disabled}
+            onSelect={onSelectNumeric}
+          />
+        </div>
+      );
+    }
+
+    // Empaquetador de arreglos: el niño empaqueta fila por fila y ve cómo
+    //    se llena la caja. Al completar revela Filas × Columnas = total.
+    if (visual === "array-packer") {
+      const p = ex.payload as { rows?: number; cols?: number; icon?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ArrayPackerGame
+            key={resetSignal}
+            rows={p.rows ?? 2}
+            cols={p.cols ?? 3}
+            icon={p.icon ?? "⭐"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Flashcard de multiplicación: carta 3D que voltea al acertar.
+    //    El niño teclea el resultado — valida automáticamente sin Comprobar.
+    if (visual === "flash-card-mult") {
+      const p = ex.payload as { a?: number; b?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <FlashCardMultGame
+            key={resetSignal}
+            a={p.a ?? 2}
+            b={p.b ?? 5}
+            disabled={disabled}
+            onSelect={onSelectNumeric}
+          />
+        </div>
+      );
+    }
+
+    // Pastel en gajos: el niño toca los gajos del SVG para colorear N/D.
+    if (visual === "fraction-pie") {
+      const p = ex.payload as { slices?: number; target?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <PieSliceGame
+            key={resetSignal}
+            slices={p.slices ?? 4}
+            target={p.target ?? 1}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Barras de fracciones: el niño toca la barra más grande (auto-valida).
+    if (visual === "fraction-bars") {
+      const p = ex.payload as { n1?: number; d1?: number; n2?: number; d2?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <FractionBarsGame
+            key={resetSignal}
+            n1={p.n1 ?? 1} d1={p.d1 ?? 2}
+            n2={p.n2 ?? 1} d2={p.d2 ?? 4}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Canasta de frutas: el niño ajusta el numerador con ▲/▼.
+    if (visual === "fruit-fraction") {
+      const p = ex.payload as { total?: number; target?: number; targetIcon?: string; otherIcon?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <FruitFractionGame
+            key={resetSignal}
+            total={p.total ?? 6}
+            target={p.target ?? 3}
+            targetIcon={typeof p.targetIcon === "string" ? p.targetIcon : "🍎"}
+            otherIcon={typeof p.otherIcon === "string" ? p.otherIcon : "🟡"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Reloj interactivo: el niño arrastra el minutero hasta el punto dorado.
+    if (visual === "clock-set") {
+      const p = ex.payload as { hour?: number; minute?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ClockSetGame
+            key={resetSignal}
+            hour={p.hour ?? 12}
+            minute={p.minute ?? 0}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Reloj lectura: el niño identifica la hora entre tres opciones de reloj.
+    if (visual === "clock-read") {
+      const p = ex.payload as { hour?: number; minute?: number; options?: unknown; correctIdx?: number };
+      const opts = Array.isArray(p.options)
+        ? (p.options as { hour: number; minute: number }[])
+        : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ClockReadGame
+            key={resetSignal}
+            hour={p.hour ?? 12}
+            minute={p.minute ?? 0}
+            options={opts}
+            correctIdx={p.correctIdx ?? 0}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Ordinales: el niño toca el elemento en la posición indicada (1.º, 2.º...).
+    if (visual === "ordinal-tap") {
+      const p = ex.payload as { items?: unknown; targetPos?: number };
+      const items = Array.isArray(p.items) ? (p.items as string[]) : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <OrdinalTapGame
+            key={resetSignal}
+            items={items}
+            targetPos={p.targetPos ?? 1}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Gráfico de barras: el niño toca la barra que responde la pregunta.
+    if (visual === "bar-graph") {
+      const p = ex.payload as { bars?: unknown; answerLabel?: string; scale?: number };
+      const bars = Array.isArray(p.bars)
+        ? (p.bars as { label: string; value: number; color: string }[])
+        : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <BarGraphGame
+            key={resetSignal}
+            bars={bars}
+            question={ex.prompt}
+            answerLabel={p.answerLabel ?? ""}
+            scale={p.scale ?? 1}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Cuadrícula de área: el niño toca cada casilla para contar el área.
+    if (visual === "area-grid") {
+      const p = ex.payload as { rows?: number; cols?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <AreaGridGame
+            key={resetSignal}
+            rows={p.rows ?? 3}
+            cols={p.cols ?? 4}
+            prompt={ex.prompt}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Ángulos: el niño toca el ángulo del tipo pedido (recto, agudo, obtuso).
+    if (visual === "angle-tap") {
+      const p = ex.payload as { angles?: unknown; targetType?: string };
+      const angles = Array.isArray(p.angles)
+        ? (p.angles as { degrees: number; id: number }[])
+        : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <AngleTapGame
+            key={resetSignal}
+            angles={angles}
+            targetType={(p.targetType ?? "right") as "right" | "acute" | "obtuse"}
+            prompt={ex.prompt}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Redondeo: el niño toca la decena/centena/millar más cercana en la recta.
+    if (visual === "rounding") {
+      const p = ex.payload as { value?: number; roundTo?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <RoundingGame
+            key={resetSignal}
+            value={p.value ?? 0}
+            roundTo={p.roundTo ?? 10}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Factores/múltiplos: el niño toca todos los factores o múltiplos del número.
+    if (visual === "factor-tap") {
+      const p = ex.payload as { target?: number; candidates?: unknown; mode?: string };
+      const candidates = Array.isArray(p.candidates) ? (p.candidates as number[]) : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <FactorTapGame
+            key={resetSignal}
+            target={p.target ?? 1}
+            candidates={candidates}
+            mode={(p.mode ?? "factor") as "factor" | "multiple"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Decimales: el niño colorea décimos en una barra para construir el decimal.
+    if (visual === "decimal-bar") {
+      const p = ex.payload as { tenths?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <DecimalBarGame
+            key={resetSignal}
+            tenths={p.tenths ?? 1}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Simetría: el niño completa el reflejo tocando las casillas del lado derecho.
+    if (visual === "symmetry-grid") {
+      const p = ex.payload as { rows?: number; cols?: number; leftCells?: unknown };
+      const leftCells = Array.isArray(p.leftCells)
+        ? (p.leftCells as [number, number][])
+        : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <SymmetryGridGame
+            key={resetSignal}
+            rows={p.rows ?? 4}
+            cols={p.cols ?? 6}
+            leftCells={leftCells}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Redes (nets): el niño toca la plantilla que forma el sólido mostrado.
+    if (visual === "net-match") {
+      const p = ex.payload as {
+        solidName?: string; solidEmoji?: string; nets?: unknown; correctType?: string;
+      };
+      const nets = Array.isArray(p.nets)
+        ? (p.nets as { id: number; type: NetType }[])
+        : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <NetMatchGame
+            key={resetSignal}
+            solidName={p.solidName ?? "cubo"}
+            solidEmoji={p.solidEmoji ?? "🧊"}
+            nets={nets}
+            correctType={(p.correctType ?? "cube") as NetType}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Gráfico de líneas: el niño toca el punto que responde la pregunta.
+    if (visual === "line-graph") {
+      const p = ex.payload as { points?: unknown; answerLabel?: string; scale?: number };
+      const points = Array.isArray(p.points)
+        ? (p.points as { label: string; value: number }[])
+        : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <LineGraphGame
+            key={resetSignal}
+            points={points}
+            question={ex.prompt}
+            answerLabel={p.answerLabel ?? ""}
+            scale={p.scale ?? 1}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Gráfico circular: el niño toca la porción correcta del pastel.
+    if (visual === "pie-chart") {
+      const p = ex.payload as { slices?: unknown; answerLabel?: string };
+      const slices = Array.isArray(p.slices)
+        ? (p.slices as { label: string; value: number; color: string }[])
+        : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <PieChartGame
+            key={resetSignal}
+            slices={slices}
+            question={ex.prompt}
+            answerLabel={p.answerLabel ?? ""}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Porcentaje: el niño colorea filas de una cuadrícula de 100 para llegar al %.
+    if (visual === "percent-grid") {
+      const p = ex.payload as { percent?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <PercentGridGame
+            key={resetSignal}
+            percent={p.percent ?? 10}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Volumen: el niño construye un cuboide tocando cubos unitarios capa por capa.
+    if (visual === "volume-build") {
+      const p = ex.payload as { length?: number; width?: number; height?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <VolumeBuildGame
+            key={resetSignal}
+            length={p.length ?? 2}
+            width={p.width ?? 2}
+            height={p.height ?? 2}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Razón: el niño llena canastas para construir la razón indicada.
+    if (visual === "ratio-build") {
+      const p = ex.payload as { groups?: unknown };
+      const groups = Array.isArray(p.groups)
+        ? (p.groups as { label: string; target: number; emoji: string }[])
+        : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <RatioBuildGame
+            key={resetSignal}
+            groups={groups}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Álgebra: el niño equilibra la balanza para resolver x + b = c.
+    if (visual === "algebra-scale") {
+      const p = ex.payload as { known?: number; total?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <AlgebraScaleGame
+            key={resetSignal}
+            known={p.known ?? 0}
+            total={p.total ?? 0}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Círculo: el niño toca la parte del círculo (centro, radio, diámetro, borde).
+    if (visual === "circle-parts") {
+      const p = ex.payload as { targetPart?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <CirclePartsGame
+            key={resetSignal}
+            targetPart={(p.targetPart ?? "radius") as CirclePart}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Promedio: el niño empareja las torres para hallar el promedio.
+    if (visual === "average-level") {
+      const p = ex.payload as { values?: unknown; labels?: unknown };
+      const values = Array.isArray(p.values) ? (p.values as number[]) : [];
+      const labels = Array.isArray(p.labels) ? (p.labels as string[]) : undefined;
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <AverageLevelGame
+            key={resetSignal}
+            values={values}
+            labels={labels}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Bloques de conversión: toca N bloques de la unidad fuente → acumula en unidad destino.
+    if (visual === "unit-block") {
+      const p = ex.payload as { n?: number; sourceLabel?: string; targetFactor?: number; targetUnit?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <UnitBlockGame
+            key={resetSignal}
+            n={p.n ?? 1}
+            sourceLabel={typeof p.sourceLabel === "string" ? p.sourceLabel : "1 m"}
+            targetFactor={p.targetFactor ?? 100}
+            targetUnit={typeof p.targetUnit === "string" ? p.targetUnit : "cm"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    if (visual === "pictogram-read") {
+      const p = ex.payload as { symbol?: string; scale?: number; scaleUnit?: string; rows?: unknown; targetLabel?: string; answer?: number };
+      const rows = Array.isArray(p.rows) ? (p.rows as { label: string; count: number }[]) : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <PictogramReadGame
+            key={resetSignal}
+            symbol={typeof p.symbol === "string" ? p.symbol : "🍎"}
+            scale={typeof p.scale === "number" ? p.scale : 5}
+            scaleUnit={typeof p.scaleUnit === "string" ? p.scaleUnit : "items"}
+            rows={rows}
+            targetLabel={typeof p.targetLabel === "string" ? p.targetLabel : ""}
+            answer={typeof p.answer === "number" ? p.answer : 0}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    if (visual === "tap-shapes") {
+      const p = ex.payload as { shapes?: unknown; target?: string };
+      const shapes = Array.isArray(p.shapes) ? (p.shapes as ShapeItem[]) : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <TapShapesGame
+            key={resetSignal}
+            shapes={shapes}
+            target={typeof p.target === "string" ? p.target : "triangle"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    if (visual === "shape-compose") {
+      const p = ex.payload as { figureName?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ShapeComposeGame
+            key={resetSignal}
+            figureName={typeof p.figureName === "string" ? p.figureName : "casa"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    if (visual === "shape-decompose") {
+      const p = ex.payload as { figureName?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ShapeDecomposeGame
+            key={resetSignal}
+            figureName={typeof p.figureName === "string" ? p.figureName : "casa"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    if (visual === "grid-trace") {
+      const p = ex.payload as { vertices?: unknown; shapeLabel?: string };
+      const vertices = Array.isArray(p.vertices) ? (p.vertices as number[]) : [0, 4, 24, 20, 0];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <GridTraceGame
+            key={resetSignal}
+            vertices={vertices}
+            shapeLabel={typeof p.shapeLabel === "string" ? p.shapeLabel : "la figura"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    if (visual === "shape-count") {
+      const p = ex.payload as { total?: number; feature?: string; noun?: string; solidEmoji?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ShapeCountGame
+            key={resetSignal}
+            total={p.total ?? 1}
+            feature={typeof p.feature === "string" ? p.feature : "cara"}
+            noun={typeof p.noun === "string" ? p.noun : "caras"}
+            solidEmoji={typeof p.solidEmoji === "string" ? p.solidEmoji : "🧊"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Toca la unidad de medida correcta (metros / kg / litros) para el objeto mostrado.
+    if (visual === "unit-tap") {
+      const p = ex.payload as { emoji?: string; units?: unknown; correctIdx?: number };
+      const units = Array.isArray(p.units) ? (p.units as string[]) : [];
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <UnitTapGame
+            key={resetSignal}
+            emoji={typeof p.emoji === "string" ? p.emoji : "❓"}
+            units={units}
+            correctIdx={p.correctIdx ?? 0}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Barras de medición: toca la medida mayor/menor (genérico, con etiquetas de texto).
+    if (visual === "measure-compare") {
+      const p = ex.payload as { aValue?: number; aLabel?: string; bValue?: number; bLabel?: string; askLarger?: boolean };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <MeasureCompareGame
+            key={resetSignal}
+            aValue={p.aValue ?? 1000}
+            aLabel={typeof p.aLabel === "string" ? p.aLabel : "A"}
+            bValue={p.bValue ?? 500}
+            bLabel={typeof p.bLabel === "string" ? p.bLabel : "B"}
+            askLarger={p.askLarger !== false}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Dar cambio: toca monedas/billetes disponibles para construir el cambio exacto.
+    if (visual === "change-making") {
+      const p = ex.payload as { price?: number; payment?: number };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <ChangeMakingGame
+            key={resetSignal}
+            price={p.price ?? 0}
+            payment={p.payment ?? 1000}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Comparar montos: dos barras de precio proporcionales, toca la mayor/menor.
+    if (visual === "money-compare") {
+      const p = ex.payload as { a?: number; b?: number; askLarger?: boolean };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <MoneyCompareGame
+            key={resetSignal}
+            a={p.a ?? 500}
+            b={p.b ?? 300}
+            askLarger={p.askLarger !== false}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Contar dinero: toca billetes y monedas → total vuela a billetera.
+    if (visual === "money-count") {
+      const p = ex.payload as { items?: { label: string; value: number; type: string }[] };
+      const items = (p.items ?? []).map(it => ({
+        label: it.label,
+        value: it.value,
+        type: (it.type === "coin" ? "coin" : "bill") as "bill" | "coin",
+      }));
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <MoneyCountGame
+            key={resetSignal}
+            items={items}
+            disabled={disabled}
+            onSelect={onSelectAuto}
+          />
+        </div>
+      );
+    }
+
+    // Casillas de fracción: sumar/restar fracciones con igual denominador tocando tiles.
+    if (visual === "fraction-tile") {
+      const p = ex.payload as { a?: number; b?: number; d?: number; op?: string };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <FractionTileGame
+            key={resetSignal}
+            a={p.a ?? 1}
+            b={p.b ?? 1}
+            d={p.d ?? 4}
+            op={(p.op === "-" ? "-" : "+") as "+" | "-"}
+            disabled={disabled}
+            onSelect={onSelectAuto}
           />
         </div>
       );
@@ -649,7 +1455,7 @@ function KindBody({
             cols={p.cols ?? 1}
             item={typeof p.item === "string" ? p.item : "🔵"}
             disabled={disabled}
-            onSelect={onSelectNumeric}
+            onSelect={onSelectAuto}
           />
         </div>
       );
@@ -668,7 +1474,7 @@ function KindBody({
             item={p.item ?? "⭐"}
             disabled={disabled}
             verified={state === "correct"}
-            onSubmit={onSelectNumeric}
+            onSubmit={onSelectAuto}
           />
         </div>
       );
@@ -729,6 +1535,21 @@ function KindBody({
       );
     }
 
+    if (visual === "pattern-continue") {
+      const p = ex.payload as { sequence?: string[] };
+      return (
+        <div className="w-full flex justify-center mb-4 md:mb-6">
+          <PatternContinueGame
+            key={resetSignal}
+            sequence={Array.isArray(p.sequence) ? p.sequence : []}
+            answer={typeof ex.solution.answer === "string" ? ex.solution.answer : ""}
+            disabled={disabled}
+            onSelect={onSelectStringAuto}
+          />
+        </div>
+      );
+    }
+
     if (visual === "pattern-next") {
       const p = ex.payload as {
         options?: string[];
@@ -742,7 +1563,7 @@ function KindBody({
             options={Array.isArray(p.options) ? p.options : []}
             selected={stringPicked}
             sequence={Array.isArray(p.sequence) ? p.sequence : []}
-            onPick={onSelectString}
+            onPick={onSelectStringAuto}
           />
         </div>
       );

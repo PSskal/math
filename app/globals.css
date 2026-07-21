@@ -166,6 +166,20 @@ body {
   }
 }
 
+@keyframes shakeX {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(3px); }
+}
+@keyframes toastPop {
+  0%   { transform: translate(-50%, 10px) scale(0.8); opacity: 0; }
+  15%  { transform: translate(-50%, 0)    scale(1);   opacity: 1; }
+  85%  { transform: translate(-50%, 0)    scale(1);   opacity: 1; }
+  100% { transform: translate(-50%, -10px) scale(0.9); opacity: 0; }
+}
+
 /* SUBTRACT: ítems removidos se "van volando" hacia arriba y se desvanecen.
    Forwards para que el estado final (invisible) se mantenga, y respeta
    prefers-reduced-motion abajo. */

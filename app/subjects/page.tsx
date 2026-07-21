@@ -149,16 +149,7 @@ function CatalogIcon({
   }
 
   if (entry.path.slug === "math-primary-1") {
-    return (
-      <Image
-        src={brand.assets.pathMathPrimary1}
-        alt=""
-        width={180}
-        height={180}
-        className={`${className} object-contain`}
-        aria-hidden
-      />
-    );
+    return <PathIllustration variant="grid" />;
   }
 
   if (entry.path.level === "INITIAL" && entry.subject.slug === "reading") {
@@ -306,7 +297,7 @@ function PathCourseCard({
   return (
     <Link
       href={`/paths/${entry.path.slug}`}
-      className="group block rounded-[26px] border-2 border-slate-200 bg-white p-4 shadow-[0_5px_0_#e5e7eb] transition-transform active:scale-[0.98] md:w-60 md:shrink-0 md:hover:-translate-y-1"
+      className="group block rounded-[26px] border-2 border-slate-200 bg-white p-4 shadow-[0_5px_0_#e5e7eb] transition-transform active:scale-[0.98] md:hover:-translate-y-1"
       aria-label={`${actionLabel} ${entry.path.name}`}
     >
       <div className="flex items-center gap-4 md:block">
@@ -428,8 +419,8 @@ export default async function SubjectsPage() {
                   </div>
 
                   {enabled ? (
-                    <div className="rounded-[28px] bg-slate-50 p-4 md:overflow-x-auto md:px-8 md:py-10">
-                      <div className="grid gap-4 md:flex md:min-w-max md:gap-5">
+                    <div className="rounded-[28px] bg-slate-50 p-4 md:px-8 md:py-10">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
                         {subject.learningPaths.map((path, index) => {
                           const isNew = index === 0 && path.progress === 0;
                           const entry = {
