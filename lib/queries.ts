@@ -6,6 +6,7 @@
 // Los helpers de compatibilidad siguen existiendo para redirects y pantallas
 // legacy, pero ya no deben usarse para presentar contenido huérfano.
 
+import { cache } from "react";
 import { prisma } from "./prisma";
 import { EducationLevel } from "@prisma/client";
 import {
@@ -127,7 +128,9 @@ export async function getActiveEnrollment(childId: string) {
 }
 
 /** Devuelve el child activo del user (cookie o primero). */
-export async function getActiveChild() {
+// cache() deduplica esta función dentro de un mismo request de React.
+// Si home/page.tsx y TopNav la llaman en paralelo, solo se hace 1 query a DB.
+export const getActiveChild = cache(async function getActiveChild() {
   const user = await getCurrentUser();
   if (!user) return null;
   if (user.children.length === 0) return null;
@@ -137,7 +140,7 @@ export async function getActiveChild() {
     if (found) return found;
   }
   return user.children[0];
-}
+});
 
 /**
  * Devuelve el primer LearningPath activo (por orden). Mientras no haya
@@ -461,7 +464,7 @@ export async function getLeaderboard(childId: string, league = "DIAMOND") {
 // =========================================================================
 // MASTERY · stats agregadas para perfil/home
 // =========================================================================
-export async function getMasteryStats(childId: string) {
+export const getMasteryStats = cache(async function getMasteryStats(childId: string) {
   const now = new Date();
   const [mastered, learning, dueToday] = await Promise.all([
     prisma.mastery.count({
@@ -479,7 +482,7 @@ export async function getMasteryStats(childId: string) {
     }),
   ]);
   return { mastered, learning, dueToday };
-}
+});
 
 /** Próximos N ejercicios cuya review está vencida (nextReviewAt <= ahora). */
 export async function getReviewQueue(childId: string, limit = 10) {

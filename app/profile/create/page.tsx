@@ -27,7 +27,7 @@ export default function CreateProfilePage() {
       const data = await res.json().catch(() => ({}));
       return setError(data.error ?? "Error creando perfil");
     }
-    router.push("/home");
+    router.push("/onboarding");
     router.refresh();
   }
 
@@ -72,7 +72,7 @@ export default function CreateProfilePage() {
           </div>
 
           <div className="mt-4">
-            <label className="text-xs font-black text-ink-soft tracking-wider">ELEGÍ TU AVATAR</label>
+            <label className="text-xs font-black text-ink-soft tracking-wider">ELIGE TU AVATAR</label>
             <div className="mt-2 grid grid-cols-3 md:grid-cols-5 gap-2">
               {AVATARS.map((a, i) => (
                 <button key={i} onClick={() => setAvatar(i)} className={`btn-chunky aspect-square rounded-2xl text-3xl md:text-4xl flex items-center justify-center border-2 ${

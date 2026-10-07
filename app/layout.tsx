@@ -1,27 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Fredoka, Nunito } from "next/font/google";
+import { Fredoka, Nunito } from "next/font/google";
 import "./globals.css";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { PwaProvider } from "@/components/pwa/PwaProvider";
 import { brand } from "@/lib/brand";
 
+// display:"swap" → el texto se muestra en fallback font inmediatamente;
+// la fuente custom reemplaza sin bloquear el render (elimina FOIT).
 const fredoka = Fredoka({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["600", "700"],   // solo los pesos usados (bold headings)
   variable: "--font-fredoka",
+  display: "swap",
 });
 
 const nunito = Nunito({
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800", "900"],
+  weight: ["400", "700", "800", "900"],  // eliminado 600 (no se usa)
   variable: "--font-nunito",
+  display: "swap",
 });
 
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-  variable: "--font-display",
-});
+// Fraunces eliminado — era ~130 KB cargados sin usarse en ningún componente.
 
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
@@ -100,7 +100,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${fredoka.variable} ${nunito.variable} ${fraunces.variable}`}
+      className={`${fredoka.variable} ${nunito.variable}`}
     >
       <body className="bg-cream text-ink">
         {metaPixelId && (

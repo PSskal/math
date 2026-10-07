@@ -25,6 +25,7 @@ const PROTECTED = [
   "/achievements",
   "/parental",
   "/settings",
+  "/onboarding",
 ];
 const AUTH_PAGES = [
   "/auth/login",
